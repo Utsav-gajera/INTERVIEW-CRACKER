@@ -1,0 +1,536 @@
+@model InterviewCracker.Models.CodingQuestion
+
+@{
+    ViewData["Title"] = "Edit Coding Question";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="fas fa-edit text-warning"></i>
+                Edit Coding Question
+            </h2>
+            <a href="@Url.Action("MyQuestions")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to My Questions
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-laptop-code"></i>
+                    Edit Coding Question Details
+                </h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="EditCodingQuestion" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                    
+                    <!-- Status Alert -->
+                    @if (Model?.IsApproved == true)
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Note:</strong> This coding question is currently approved. Editing will reset its approval status.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">
+                            <i class="fas fa-clock"></i>
+                            <strong>Status:</strong> This coding question is pending approval.
+                        </div>
+                    }
+                    
+                    <!-- Title -->
+                    <div class="form-group">
+                        <label asp-for="Title" class="form-label font-weight-bold">
+                            <i class="fas fa-heading"></i> Question Title *
+                        </label>
+                        <input asp-for="Title" class="form-control" placeholder="e.g., Two Sum, Reverse Linked List, Binary Search">
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                        <small class="form-text text-muted">A clear, descriptive title for your coding problem</small>
+                    </div>
+
+                    <!-- Problem Statement -->
+                    <div class="form-group">
+                        <label asp-for="Problem" class="form-label font-weight-bold">
+                            <i class="fas fa-file-alt"></i> Problem Statement *
+                        </label>
+                        <textarea asp-for="Problem" class="form-control" rows="8" 
+                                  placeholder="Describe the problem clearly. Include:&#10;- Problem description&#10;- Input/Output format&#10;- Constraints&#10;- Examples"></textarea>
+                        <span asp-validation-for="Problem" class="text-danger"></span>
+                        <small class="form-text text-muted">Provide a detailed problem description with examples</small>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group">
+                        <label asp-for="Description" class="form-label font-weight-bold">
+                            <i class="fas fa-info-circle"></i> Description *
+                        </label>
+                        <textarea asp-for="Description" class="form-control" rows="4" 
+                                  placeholder="Brief description or summary of the problem"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                        <small class="form-text text-muted">Provide a concise description of the coding question</small>
+                    </div>
+
+                    <!-- Sample Input and Output -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="SampleInput" class="form-label font-weight-bold">
+                                    <i class="fas fa-arrow-right text-primary"></i> Sample Input
+                                </label>
+                                <textarea asp-for="SampleInput" class="form-control code-input" rows="4" 
+                                          placeholder="Example:&#10;5&#10;[1, 2, 3, 4, 5]"></textarea>
+                                <small class="form-text text-muted">Provide sample input data (formatting preserved)</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="SampleOutput" class="form-label font-weight-bold">
+                                    <i class="fas fa-arrow-left text-success"></i> Sample Output
+                                </label>
+                                <textarea asp-for="SampleOutput" class="form-control code-input" rows="4" 
+                                          placeholder="Example:&#10;15"></textarea>
+                                <small class="form-text text-muted">Expected output for the sample input (formatting preserved)</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Solution -->
+                    <div class="form-group">
+                        <label asp-for="Solution" class="form-label font-weight-bold">
+                            <i class="fas fa-code text-info"></i> Solution Code
+                        </label>
+                        <textarea asp-for="Solution" class="form-control code-input" rows="12" 
+                                  placeholder="Provide your solution code here (optional but recommended)...&#10;&#10;Example:&#10;public int[] TwoSum(int[] nums, int target) {&#10;    // Your solution code&#10;}"></textarea>
+                        <small class="form-text text-muted">
+                            <i class="fas fa-info-circle"></i> Optional: Provide a working solution for reference. 
+                            <strong>Your code formatting, spaces, and indentation will be preserved.</strong>
+                        </small>
+                    </div>
+
+                    <!-- Company and College -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="CollegeId" class="form-label font-weight-bold">
+                                    <i class="fas fa-university"></i> College
+                                </label>
+                                <select asp-for="CollegeId" id="CollegeId" class="form-control">
+                                    <option value="">Select College</option>
+                                    @if (ViewBag.Colleges != null)
+                                    {
+                                        @foreach (var college in (List<InterviewCracker.Models.College>)ViewBag.Colleges)
+                                        {
+                                            <option value="@college.Id">@college.Name</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="CompanyId" class="form-label font-weight-bold">
+                                    <i class="fas fa-building"></i> Company
+                                </label>
+                                <select asp-for="CompanyId" id="CompanyId" class="form-control">
+                                    <option value="">Select Company</option>
+                                    @if (ViewBag.Companies != null)
+                                    {
+                                        @foreach (var company in (List<InterviewCracker.Models.Company>)ViewBag.Companies)
+                                        {
+                                            <option value="@company.Id">@company.Name</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Year and Difficulty -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Year" class="form-label font-weight-bold">
+                                    <i class="fas fa-calendar"></i> Year
+                                </label>
+                                <input asp-for="Year" type="number" class="form-control" 
+                                       min="2000" max="@DateTime.Now.Year" placeholder="2024">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="Difficulty" class="form-label font-weight-bold">
+                                    <i class="fas fa-chart-bar"></i> Difficulty Level
+                                </label>
+                                <select asp-for="Difficulty" id="Difficulty" class="form-control">
+                                    <option value="">Select Difficulty</option>
+                                    <option value="Easy">Easy</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Hard">Hard</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Change Summary -->
+                    <div class="form-group">
+                        <label class="form-label font-weight-bold">
+                            <i class="fas fa-clipboard-list"></i> Summary of Changes
+                        </label>
+                        <textarea id="changeSummary" class="form-control" rows="2" 
+                                  placeholder="Optional: Briefly describe what changes you made..."></textarea>
+                        <small class="form-text text-muted">This helps admins understand your updates</small>
+                    </div>
+
+                    <!-- Guidelines -->
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle"></i> Guidelines for Coding Questions:</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="mb-0">
+                                    <li>Use clear and concise problem descriptions</li>
+                                    <li>Include multiple test cases in examples</li>
+                                    <li>Specify input/output formats clearly</li>
+                                    <li><strong>Note:</strong> Editing will reset approval status</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="mb-0">
+                                    <li>Provide edge cases in your examples</li>
+                                    <li>Include a working solution for verification</li>
+                                    <li>Use proper formatting for code snippets</li>
+                                    <li>Questions will be re-reviewed after updates</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preview Section -->
+                    <div class="card bg-light mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="fas fa-eye"></i> Preview</h6>
+                        </div>
+                        <div class="card-body" id="preview-content">
+                            <!-- Preview will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="form-group text-center">
+                        <button type="submit" class="btn btn-warning btn-lg mr-3">
+                            <i class="fas fa-save"></i> Update Coding Question
+                        </button>
+                        <a href="@Url.Action("MyQuestions")" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-label {
+        margin-bottom: 0.3rem;
+    }
+    
+    .card {
+        border-radius: 10px;
+    }
+    
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+    
+    textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+    }
+    
+    .code-input {
+        font-family: 'Courier New', 'Monaco', 'Menlo', 'Consolas', monospace !important;
+        font-size: 14px !important;
+        background-color: #f8f9fa !important;
+        white-space: pre-wrap !important; /* Preserves spaces and line breaks */
+        tab-size: 4 !important; /* Sets tab width to 4 spaces */
+        line-height: 1.4 !important; /* Better line spacing for code */
+        overflow-wrap: break-word !important; /* Handles long lines */
+        word-wrap: break-word !important;
+    }
+    
+    .alert {
+        border-left: 4px solid;
+        border-radius: 5px;
+    }
+    
+    .alert-info {
+        border-left-color: #17a2b8;
+    }
+    
+    .alert-warning {
+        border-left-color: #ffc107;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 2rem;
+    }
+    
+    #preview-content {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .preview-title {
+        color: #28a745;
+        font-size: 1.3em;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+    
+    .preview-problem {
+        white-space: pre-wrap;
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        border-left: 4px solid #007bff;
+    }
+    
+    .preview-io {
+        background-color: #e9ecef;
+        padding: 10px;
+        border-radius: 4px;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 13px;
+        margin-bottom: 10px;
+    }
+    
+    .preview-solution {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        border-left: 4px solid #28a745;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 13px;
+        white-space: pre-wrap;
+        overflow-x: auto;
+    }
+    
+    /* Fix dropdown width issues */
+    #CollegeId, #CompanyId, #Difficulty {
+        width: 100% !important;
+        min-width: 250px;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
+        height: auto !important;
+        padding: 8px 12px;
+        /* Remove duplicate dropdown arrows */
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+        padding-right: 2.25rem;
+    }
+    
+    #CollegeId option, #CompanyId option, #Difficulty option {
+        white-space: normal;
+        word-wrap: break-word;
+        padding: 8px 12px;
+    }
+    
+    /* Ensure dropdowns show full content when opened */
+    select.form-control {
+        box-sizing: border-box;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        $(document).ready(function() {
+            var selectedCollegeId = $('#CollegeId').val();
+            var selectedCompanyId = $('#CompanyId').val();
+            
+            // Function to load companies based on selected college
+            function loadCompaniesByCollege() {
+                var newCollegeId = $('#CollegeId').val();
+                var companySelect = $('#CompanyId');
+                
+                // Clear current options except the first one
+                companySelect.empty();
+                companySelect.append('<option value="">Select Company</option>');
+                
+                if (newCollegeId) {
+                    // Make AJAX call to get companies for the selected college
+                    $.ajax({
+                        url: '@Url.Action("GetCompaniesByCollege", "Contributor")',
+                        type: 'GET',
+                        data: { collegeId: newCollegeId },
+                        success: function(companies) {
+                            if (companies && companies.length > 0) {
+                                $.each(companies, function(index, company) {
+                                    companySelect.append($('<option></option>')
+                                        .attr('value', company.id)
+                                        .text(company.name));
+                                });
+                                
+                                // Restore previously selected company if it's still available
+                                if (selectedCompanyId && newCollegeId === selectedCollegeId) {
+                                    companySelect.val(selectedCompanyId);
+                                }
+                            } else {
+                                companySelect.append('<option value="" disabled>No companies available for this college</option>');
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error loading companies:', error);
+                            companySelect.append('<option value="" disabled>Error loading companies</option>');
+                        }
+                    });
+                }
+            }
+            
+            // Bind college change event
+            $('#CollegeId').change(function() {
+                loadCompaniesByCollege();
+            });
+            
+            // Initial load - load companies for current college selection
+            if (selectedCollegeId) {
+                loadCompaniesByCollege();
+            }
+            
+            // Real-time preview
+            function updatePreview() {
+                const title = $('#Title').val().trim();
+                const problem = $('#Problem').val().trim();
+                const sampleInput = $('#SampleInput').val().trim();
+                const sampleOutput = $('#SampleOutput').val().trim();
+                const solution = $('#Solution').val().trim();
+                const difficulty = $('#Difficulty').val();
+                
+                let previewHtml = '';
+                
+                if (title) {
+                    previewHtml += `<div class="preview-title">${title}</div>`;
+                }
+                
+                if (difficulty) {
+                    const badgeClass = difficulty === 'Easy' ? 'badge-success' : 
+                                     difficulty === 'Medium' ? 'badge-warning' : 'badge-danger';
+                    previewHtml += `<span class="badge ${badgeClass} mb-3">${difficulty}</span><br>`;
+                }
+                
+                if (problem) {
+                    previewHtml += `<div class="preview-problem"><strong>Problem:</strong><br>${problem}</div>`;
+                }
+                
+                if (sampleInput || sampleOutput) {
+                    previewHtml += '<div class="row">';
+                    if (sampleInput) {
+                        previewHtml += `
+                            <div class="col-md-6">
+                                <strong>Sample Input:</strong>
+                                <div class="preview-io">${sampleInput}</div>
+                            </div>`;
+                    }
+                    if (sampleOutput) {
+                        previewHtml += `
+                            <div class="col-md-6">
+                                <strong>Sample Output:</strong>
+                                <div class="preview-io">${sampleOutput}</div>
+                            </div>`;
+                    }
+                    previewHtml += '</div>';
+                }
+                
+                if (solution) {
+                    previewHtml += `
+                        <div class="mt-3">
+                            <strong>Solution:</strong>
+                            <div class="preview-solution">${solution}</div>
+                        </div>`;
+                }
+                
+                if (!previewHtml) {
+                    previewHtml = '<p class="text-muted">Fill in the form above to see a preview of your question</p>';
+                }
+                
+                $('#preview-content').html(previewHtml);
+            }
+            
+            // Update preview on input
+            $('#Title, #Problem, #SampleInput, #SampleOutput, #Solution, #Difficulty').on('input change', updatePreview);
+            
+            // Character counters
+            function addCharacterCounter(selector, maxLength) {
+                $(selector).on('input', function() {
+                    const currentLength = $(this).val().length;
+                    const remaining = maxLength - currentLength;
+                    
+                    let counter = $(this).siblings('.char-counter');
+                    if (counter.length === 0) {
+                        counter = $('<small class="char-counter text-muted"></small>');
+                        $(this).after(counter);
+                    }
+                    
+                    counter.text(`${currentLength}/${maxLength} characters`);
+                    
+                    if (remaining < 100) {
+                        counter.removeClass('text-muted').addClass('text-warning');
+                    }
+                    if (remaining < 0) {
+                        counter.removeClass('text-warning').addClass('text-danger');
+                    }
+                });
+            }
+            
+            addCharacterCounter('#Title', 200);
+            addCharacterCounter('#Problem', 5000);
+            
+            // Form validation
+            $('form').on('submit', function(e) {
+                const title = $('#Title').val().trim();
+                const problem = $('#Problem').val().trim();
+                
+                if (!title || !problem) {
+                    e.preventDefault();
+                    alert('Please fill in the required fields: Title and Problem Statement.');
+                    return false;
+                }
+                
+                if (title.length < 5) {
+                    e.preventDefault();
+                    alert('Title must be at least 5 characters long.');
+                    $('#Title').focus();
+                    return false;
+                }
+                
+                if (problem.length < 50) {
+                    e.preventDefault();
+                    alert('Problem statement must be at least 50 characters long.');
+                    $('#Problem').focus();
+                    return false;
+                }
+            });
+            
+            // Initialize preview
+            updatePreview();
+        });
+    </script>
+}

@@ -1,0 +1,346 @@
+@model QuestionsViewModel
+@{
+    ViewData["Title"] = $"Questions - {Model.Company.Name} at {Model.College.Name}";
+}
+
+@section Styles {
+
+}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Home")">
+                <i class="fas fa-home"></i> Home
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="@Url.Action("Companies", "Home", new { collegeId = Model.College.Id })">
+                @Model.College.Name
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            @Model.Company.Name
+        </li>
+    </ol>
+</nav>
+
+<!-- Company Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="questions-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2 class="mb-2">
+                        <i class="fas fa-building"></i> @Model.Company.Name
+                    </h2>
+                    <p class="mb-2">@Model.Company.Description</p>
+                    <small>
+                        <i class="fas fa-university"></i> @Model.College.Name
+                    </small>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <div class="question-stats">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <h4>@Model.MCQs.Count</h4>
+                                <small>MCQs</small>
+                            </div>
+                            <div class="col-6">
+                                <h4>@Model.CodingQuestions.Count</h4>
+                                <small>Coding</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="search-form-container">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-filter"></i> Filter Questions</h5>
+            </div>
+            <div class="search-form-body">
+                <form method="get" asp-action="Questions">
+                    <input type="hidden" name="collegeId" value="@Model.College.Id" />
+                    <input type="hidden" name="companyId" value="@Model.Company.Id" />
+                    <div class="row g-3">
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <label for="filterYear" class="form-label">Year:</label>
+                            <select class="form-control" id="filterYear" name="filterYear">
+                                <option value="">All Years</option>
+                                <option value="2024" selected="@(Model.FilterYear == 2024)">2024</option>
+                                <option value="2023" selected="@(Model.FilterYear == 2023)">2023</option>
+                                <option value="2022" selected="@(Model.FilterYear == 2022)">2022</option>
+                                <option value="2021" selected="@(Model.FilterYear == 2021)">2021</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <label for="filterDifficulty" class="form-label">Difficulty:</label>
+                            <select class="form-control" id="filterDifficulty" name="filterDifficulty">
+                                <option value="">All Levels</option>
+                                <option value="Easy" selected="@(Model.FilterDifficulty == "Easy")">Easy</option>
+                                <option value="Medium" selected="@(Model.FilterDifficulty == "Medium")">Medium</option>
+                                <option value="Hard" selected="@(Model.FilterDifficulty == "Hard")">Hard</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-4 col-md-8 mb-3">
+                            <label for="searchTerm" class="form-label">Search:</label>
+                            <input type="text" class="form-control" id="searchTerm" name="searchTerm" 
+                                   value="@Model.SearchTerm" placeholder="Search questions...">
+                        </div>
+                        <div class="col-lg-2 col-md-4 mb-3 d-flex align-items-end">
+                            <div class="search-buttons-container w-100">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i>&nbsp;Filter
+                                </button>
+                                <a href="@Url.Action("Questions", new { collegeId = Model.College.Id, companyId = Model.Company.Id })" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times"></i>&nbsp;Clear
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Results Info -->
+@if (Model.FilterYear.HasValue || !string.IsNullOrEmpty(Model.FilterDifficulty) || !string.IsNullOrEmpty(Model.SearchTerm))
+{
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="search-results-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>Filtered Results:</strong> 
+                Showing <span class="badge bg-primary text-white">@(Model.MCQs.Count + Model.CodingQuestions.Count)</span> question(s)
+                @if (Model.FilterYear.HasValue)
+                {
+                    <span>from year <strong>@Model.FilterYear</strong></span>
+                }
+                @if (!string.IsNullOrEmpty(Model.FilterDifficulty))
+                {
+                    <span>with <strong>@Model.FilterDifficulty</strong> difficulty</span>
+                }
+                @if (!string.IsNullOrEmpty(Model.SearchTerm))
+                {
+                    <span>matching "<strong>@Model.SearchTerm</strong>"</span>
+                }
+                <a href="@Url.Action("Questions", new { collegeId = Model.College.Id, companyId = Model.Company.Id })" class="float-end text-primary">
+                    <i class="fas fa-times"></i> Clear all filters
+                </a>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Question Tabs -->
+<div class="row">
+    <div class="col-12">
+        <div class="questions-container">
+        <ul class="nav nav-tabs" id="questionTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="mcq-tab" data-toggle="tab" href="#mcq" role="tab" aria-controls="mcq" aria-selected="true">
+                    <i class="fas fa-check-circle"></i> MCQs (@Model.MCQs.Count)
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="coding-tab" data-toggle="tab" href="#coding" role="tab" aria-controls="coding" aria-selected="false">
+                    <i class="fas fa-code"></i> Coding Questions (@Model.CodingQuestions.Count)
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content" id="questionTabsContent">
+            <!-- MCQ Tab -->
+            <div class="tab-pane fade show active" id="mcq" role="tabpanel">
+                <div class="mt-3">
+                    @if (Model.MCQs.Any())
+                    {
+                        @foreach (var mcq in Model.MCQs)
+                        {
+                            <div class="card mb-3 question-card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="badge bg-primary text-white">@mcq.Year</span>
+                                        <span class="badge bg-@(mcq.Difficulty == "Easy" ? "success" : mcq.Difficulty == "Medium" ? "warning" : "danger") text-white">
+                                            @mcq.Difficulty
+                                        </span>
+                                    </div>
+                                    <small class="text-muted">MCQ #@mcq.Id</small>
+                                </div>
+                                <div class="card-body">
+                                    <h6 class="question-text">@mcq.Question</h6>
+                                    <div class="options mt-3">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-2">
+                                                <div class="option @(mcq.CorrectAnswer == "A" ? "correct-option" : "")">
+                                                    <strong>A)</strong> @mcq.OptionA
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-2">
+                                                <div class="option @(mcq.CorrectAnswer == "B" ? "correct-option" : "")">
+                                                    <strong>B)</strong> @mcq.OptionB
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-2">
+                                                <div class="option @(mcq.CorrectAnswer == "C" ? "correct-option" : "")">
+                                                    <strong>C)</strong> @mcq.OptionC
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-2">
+                                                <div class="option @(mcq.CorrectAnswer == "D" ? "correct-option" : "")">
+                                                    <strong>D)</strong> @mcq.OptionD
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="answer-section mt-3">
+                                        <strong class="text-success">
+                                            <i class="fas fa-check-circle"></i> Correct Answer: @mcq.CorrectAnswer
+                                        </strong>
+                                        @if (!string.IsNullOrEmpty(mcq.Explanation))
+                                        {
+                                            <div class="explanation mt-2">
+                                                <small class="text-muted">
+                                                    <strong>Explanation:</strong> @mcq.Explanation
+                                                </small>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="alert alert-info text-center mt-3">
+                            <i class="fas fa-info-circle"></i> No MCQs found matching your criteria.
+                        </div>
+                    }
+                </div>
+            </div>
+            
+            <!-- Coding Questions Tab -->
+            <div class="tab-pane fade" id="coding" role="tabpanel">
+                <div class="mt-3">
+                    @if (Model.CodingQuestions.Any())
+                    {
+                        @foreach (var question in Model.CodingQuestions)
+                        {
+                            <div class="card mb-3 question-card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="badge bg-primary text-white">@question.Year</span>
+                                        <span class="badge bg-@(question.Difficulty == "Easy" ? "success" : question.Difficulty == "Medium" ? "warning" : "danger") text-white">
+                                            @question.Difficulty
+                                        </span>
+                                    </div>
+                                    <small class="text-muted">Problem #@question.Id</small>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="question-title text-primary">@question.Title</h5>
+                                    <div class="problem-statement mt-3">
+                                        <h6>Problem Statement:</h6>
+                                        <p>@question.Problem</p>
+                                    </div>
+                                    
+                                    @if (!string.IsNullOrEmpty(question.SampleInput))
+                                    {
+                                        <div class="sample-input mt-3">
+                                            <h6>Sample Input:</h6>
+                                            <pre class="code-sample">@question.SampleInput</pre>
+                                        </div>
+                                    }
+                                    
+                                    @if (!string.IsNullOrEmpty(question.SampleOutput))
+                                    {
+                                        <div class="sample-output mt-3">
+                                            <h6>Sample Output:</h6>
+                                            <pre class="code-sample">@question.SampleOutput</pre>
+                                        </div>
+                                    }
+                                    
+                                    <div class="solution-section mt-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h6 class="text-success">
+                                                <i class="fas fa-lightbulb"></i> Solution:
+                                            </h6>
+                                            <button class="btn btn-sm btn-outline-primary" type="button" 
+                                                    data-toggle="collapse" data-target="#solution-@question.Id" aria-expanded="false" aria-controls="solution-@question.Id">
+                                                <i class="fas fa-eye"></i> Show/Hide
+                                            </button>
+                                        </div>
+                                        <div class="collapse" id="solution-@question.Id">
+                                            <div class="mt-2 p-3 bg-light rounded solution-code">
+                                                <pre class="mb-0">@question.Solution</pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="alert alert-info text-center mt-3">
+                            <i class="fas fa-info-circle"></i> No coding questions found matching your criteria.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Filter form enhancements
+            var filterForm = $('form[method="get"]');
+            var filterBtn = filterForm.find('button[type="submit"]');
+            var originalBtnText = filterBtn.html();
+
+            // Form submission with loading state
+            filterForm.on('submit', function() {
+                filterBtn.html('<i class="fas fa-spinner fa-spin"></i>&nbsp;Loading...');
+                filterBtn.prop('disabled', true);
+            });
+
+            // Auto-submit on dropdown changes
+            $('#filterYear, #filterDifficulty').on('change', function() {
+                var searchTerm = $('#searchTerm').val();
+                var hasFilters = $('#filterYear').val() || $('#filterDifficulty').val() || searchTerm.length > 0;
+                if (hasFilters) {
+                    filterForm.submit();
+                }
+            });
+
+            // Search on Enter key
+            $('#searchTerm').on('keypress', function(e) {
+                if (e.which == 13) {
+                    filterForm.submit();
+                }
+            });
+
+            // Highlight search results
+            var searchTerm = '@Html.Raw(Model.SearchTerm ?? "")';
+            if (searchTerm.length > 0) {
+                $('.question-text, .question-title, .option').each(function() {
+                    var text = $(this).text();
+                    var regex = new RegExp('(' + searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+                    $(this).html(text.replace(regex, '<mark>$1</mark>'));
+                });
+            }
+
+            // Tab switching is handled by Bootstrap automatically
+        });
+    </script>
+}

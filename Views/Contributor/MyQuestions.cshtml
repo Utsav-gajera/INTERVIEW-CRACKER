@@ -1,0 +1,396 @@
+@model InterviewCracker.Models.QuestionsViewModel
+
+@{
+    ViewData["Title"] = "My Questions";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="fas fa-list text-primary"></i>
+                My Questions
+            </h2>
+            <div>
+                <a href="@Url.Action("AddMCQ")" class="btn btn-primary mr-2">
+                    <i class="fas fa-plus"></i> Add MCQ
+                </a>
+                <a href="@Url.Action("AddCodingQuestion")" class="btn btn-success">
+                    <i class="fas fa-code"></i> Add Coding Question
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filter Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="search-form-container">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-filter"></i> Filter My Questions</h5>
+            </div>
+            <div class="search-form-body">
+                <div class="row">
+                    <div class="col-lg-4 col-md-6 mb-3">
+                        <label for="difficultyFilter" class="form-label">Difficulty:</label>
+                        <select class="form-control" id="difficultyFilter">
+                            <option value="">All Difficulties</option>
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2 col-md-6 mb-3 d-flex align-items-end">
+                        <div class="search-buttons-container w-100">
+                            <button type="button" class="btn btn-outline-secondary" id="clearFilters">
+                                <i class="fas fa-times"></i>&nbsp;Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs -->
+<ul class="nav nav-tabs" id="questionsTab" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link active" id="mcq-tab" data-toggle="tab" href="#mcq" role="tab" aria-controls="mcq" aria-selected="true">
+            <i class="fas fa-question-circle"></i> MCQs (<span id="mcq-count">@(Model?.MCQs?.Count ?? 0)</span>)
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="coding-tab" data-toggle="tab" href="#coding" role="tab" aria-controls="coding" aria-selected="false">
+            <i class="fas fa-code"></i> Coding Questions (<span id="coding-count">@(Model?.CodingQuestions?.Count ?? 0)</span>)
+        </a>
+    </li>
+</ul>
+
+<div class="tab-content" id="questionsTabContent">
+    <!-- MCQ Tab -->
+    <div class="tab-pane fade show active" id="mcq" role="tabpanel" aria-labelledby="mcq-tab">
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Multiple Choice Questions</h5>
+            </div>
+            <div class="card-body">
+                @if (Model?.MCQs != null && Model.MCQs.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Question</th>
+                                    <th>Company</th>
+                                    <th>Year</th>
+                                    <th>Difficulty</th>
+                                    <th>Status</th>
+                                    <th>Created Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var mcq in Model.MCQs.Where(m => m.IsActive))
+                                {
+                                    <tr>
+                                        <td>
+                                            <div style="max-width: 300px;">
+                                                @(mcq.Question.Length > 100 ? mcq.Question.Substring(0, 100) + "..." : mcq.Question)
+                                            </div>
+                                        </td>
+                                        <td>-</td>
+                                        <td>@mcq.Year</td>
+                                        <td>
+                                            @switch (mcq.Difficulty)
+                                            {
+                                                case "Easy":
+                                                    <span class="badge bg-success text-white">Easy</span>
+                                                    break;
+                                                case "Medium":
+                                                    <span class="badge bg-warning text-dark">Medium</span>
+                                                    break;
+                                                case "Hard":
+                                                    <span class="badge bg-danger text-white">Hard</span>
+                                                    break;
+                                                default:
+                                                    <span class="badge bg-secondary text-white">@mcq.Difficulty</span>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (mcq.IsApproved)
+                                            {
+                                                <span class="badge bg-success text-white">
+                                                    <i class="fas fa-check"></i> Approved
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="fas fa-clock"></i> Pending
+                                                </span>
+                                            }
+                                        </td>
+                                        <td>@mcq.CreatedDate.ToString("MMM dd, yyyy")</td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="@Url.Action("EditMCQ", new { id = mcq.Id })" class="btn btn-sm btn-outline-primary" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="@Url.Action("DeleteMCQ", new { id = mcq.Id })" class="btn btn-sm btn-outline-danger" 
+                                                   onclick="return confirm('Are you sure you want to delete this MCQ?')" title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="fas fa-question-circle fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No MCQs found</h5>
+                        <p class="text-muted">You haven't added any MCQs yet. Click the "Add MCQ" button to get started.</p>
+                        <a href="@Url.Action("AddMCQ")" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add Your First MCQ
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Coding Questions Tab -->
+    <div class="tab-pane fade" id="coding" role="tabpanel" aria-labelledby="coding-tab">
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Coding Questions</h5>
+            </div>
+            <div class="card-body">
+                @if (Model?.CodingQuestions != null && Model.CodingQuestions.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Problem</th>
+                                    <th>Company</th>
+                                    <th>Year</th>
+                                    <th>Difficulty</th>
+                                    <th>Status</th>
+                                    <th>Created Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var question in Model.CodingQuestions.Where(c => c.IsActive))
+                                {
+                                    <tr>
+                                        <td>
+                                            <div style="max-width: 200px;">
+                                                @question.Title
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div style="max-width: 300px;">
+                                                @(question.Problem.Length > 100 ? question.Problem.Substring(0, 100) + "..." : question.Problem)
+                                            </div>
+                                        </td>
+                                        <td>-</td>
+                                        <td>@question.Year</td>
+                                        <td>
+                                            @switch (question.Difficulty)
+                                            {
+                                                case "Easy":
+                                                    <span class="badge bg-success text-white">Easy</span>
+                                                    break;
+                                                case "Medium":
+                                                    <span class="badge bg-warning text-dark">Medium</span>
+                                                    break;
+                                                case "Hard":
+                                                    <span class="badge bg-danger text-white">Hard</span>
+                                                    break;
+                                                default:
+                                                    <span class="badge bg-secondary text-white">@question.Difficulty</span>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (question.IsApproved)
+                                            {
+                                                <span class="badge bg-success text-white">
+                                                    <i class="fas fa-check"></i> Approved
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="fas fa-clock"></i> Pending
+                                                </span>
+                                            }
+                                        </td>
+                                        <td>@question.CreatedDate.ToString("MMM dd, yyyy")</td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="@Url.Action("EditCodingQuestion", new { id = question.Id })" class="btn btn-sm btn-outline-primary" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="@Url.Action("DeleteCodingQuestion", new { id = question.Id })" class="btn btn-sm btn-outline-danger" 
+                                                   onclick="return confirm('Are you sure you want to delete this coding question?')" title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="fas fa-code fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Coding Questions found</h5>
+                        <p class="text-muted">You haven't added any coding questions yet. Click the "Add Coding Question" button to get started.</p>
+                        <a href="@Url.Action("AddCodingQuestion")" class="btn btn-success">
+                            <i class="fas fa-plus"></i> Add Your First Coding Question
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .nav-tabs .nav-link {
+        color: #495057;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #007bff;
+        font-weight: bold;
+    }
+    
+    .btn-group .btn {
+        margin-right: 2px;
+    }
+    
+    .badge {
+        font-size: 0.75em;
+    }
+    
+    .filtered-row {
+        display: none;
+    }
+    
+    .no-results {
+        text-align: center;
+        padding: 2rem;
+        color: #6c757d;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            let mcqData = [];
+            let codingData = [];
+            
+            // Store original table data for filtering
+            $('#mcq tbody tr').each(function() {
+                const row = $(this);
+                mcqData.push({
+                    element: row,
+                    difficulty: row.find('.badge').text().trim().toLowerCase()
+                });
+            });
+            
+            $('#coding tbody tr').each(function() {
+                const row = $(this);
+                codingData.push({
+                    element: row,
+                    difficulty: row.find('.badge').text().trim().toLowerCase()
+                });
+            });
+            
+            // Filter functionality
+            function filterTables() {
+                const difficultyFilter = $('#difficultyFilter').val().toLowerCase();
+                
+                // Filter MCQs
+                let visibleMcqs = 0;
+                mcqData.forEach(function(item) {
+                    const matchesDifficulty = !difficultyFilter || item.difficulty.includes(difficultyFilter);
+                    
+                    if (matchesDifficulty) {
+                        item.element.show();
+                        visibleMcqs++;
+                    } else {
+                        item.element.hide();
+                    }
+                });
+                
+                // Filter Coding Questions
+                let visibleCoding = 0;
+                codingData.forEach(function(item) {
+                    const matchesDifficulty = !difficultyFilter || item.difficulty.includes(difficultyFilter);
+                    
+                    if (matchesDifficulty) {
+                        item.element.show();
+                        visibleCoding++;
+                    } else {
+                        item.element.hide();
+                    }
+                });
+                
+                // Update counts
+                $('#mcq-count').text(visibleMcqs);
+                $('#coding-count').text(visibleCoding);
+                
+                // Show/hide no results messages
+                toggleNoResultsMessage('#mcq', visibleMcqs === 0);
+                toggleNoResultsMessage('#coding', visibleCoding === 0);
+            }
+            
+            function toggleNoResultsMessage(tabId, show) {
+                const noResultsId = tabId + '-no-results';
+                if (show) {
+                    if ($(noResultsId).length === 0) {
+                        $(tabId + ' .table-responsive').after(
+                            '<div id="' + noResultsId.substring(1) + '" class="no-results">' +
+                            '<i class="fas fa-search fa-2x mb-3"></i><br>' +
+                            '<h5>No questions found</h5>' +
+                            '<p>No questions match your current filter criteria.</p>' +
+                            '</div>'
+                        );
+                    }
+                    $(tabId + ' .table-responsive').hide();
+                } else {
+                    $(noResultsId).remove();
+                    $(tabId + ' .table-responsive').show();
+                }
+            }
+            
+            // Event listeners
+            $('#difficultyFilter').on('input change', filterTables);
+            
+            $('#clearFilters').on('click', function() {
+                $('#difficultyFilter').val('');
+                filterTables();
+            });
+        });
+    </script>
+}

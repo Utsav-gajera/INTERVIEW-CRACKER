@@ -1,0 +1,586 @@
+@model List<InterviewCracker.Models.User>
+
+@{
+    ViewData["Title"] = "Manage Users";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="fas fa-users text-info"></i>
+                Manage Users
+            </h2>
+            <a href="@Url.Action("AddContributor")" class="btn btn-success">
+                <i class="fas fa-user-plus"></i> Add New Contributor
+            </a>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i>
+        @TempData["Message"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle"></i>
+        @TempData["Error"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-users fa-2x mr-3"></i>
+                    <div>
+                        <h3 class="mb-0">@Model.Count()</h3>
+                        <small>Total Users</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-user-edit fa-2x mr-3"></i>
+                    <div>
+                        <h3 class="mb-0">@Model.Count(u => u.Role == "Contributor")</h3>
+                        <small>Contributors</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-user-graduate fa-2x mr-3"></i>
+                    <div>
+                        <h3 class="mb-0">@Model.Count(u => u.Role == "Student")</h3>
+                        <small>Students</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-user-shield fa-2x mr-3"></i>
+                    <div>
+                        <h3 class="mb-0">@Model.Count(u => u.Role == "Admin")</h3>
+                        <small>Admins</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filter -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-5 col-lg-6">
+                <div class="form-group mb-0">
+                    <label for="searchInput" class="form-label font-weight-bold">Search Users:</label>
+                    <input type="text" id="searchInput" class="form-control" 
+                           placeholder="Search by name, email, or organization..."
+                           aria-describedby="searchHelp">
+                    <small id="searchHelp" class="form-text text-muted">Type to filter users in real-time</small>
+                </div>
+            </div>
+            
+            
+        </div>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="card shadow">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0">
+            <i class="fas fa-list"></i>
+            All Users
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-striped mb-0" id="usersTable">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>User</th>
+                            <th>Role</th>
+                            <th>Organization</th>
+                            <th>Date Joined</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model.OrderBy(u => u.Name))
+                        {
+                            <tr data-user-id="@user.Id" class="@(user.IsActive ? "" : "table-secondary")">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="user-avatar mr-3">
+                                            @{
+                                                var avatarClass = user.Role switch
+                                                {
+                                                    "Admin" => "bg-warning",
+                                                    "Contributor" => "bg-success",
+                                                    "Student" => "bg-primary",
+                                                    _ => "bg-secondary"
+                                                };
+                                                var avatarIcon = user.Role switch
+                                                {
+                                                    "Admin" => "fa-user-shield",
+                                                    "Contributor" => "fa-user-edit",
+                                                    "Student" => "fa-user-graduate",
+                                                    _ => "fa-user"
+                                                };
+                                            }
+                                            <div class="@avatarClass text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                                 style="width: 45px; height: 45px;">
+                                                <i class="fas @avatarIcon"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">@user.Name</h6>
+                                            <small class="text-muted">@user.Email</small><br>
+                                            <small class="text-muted">ID: @user.Id</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    @{
+                                        var roleBadge = user.Role switch
+                                        {
+                                            "Admin" => "bg-warning text-dark",
+                                            "Contributor" => "bg-success text-white",
+                                            "Student" => "bg-primary text-white",
+                                            _ => "bg-secondary text-white"
+                                        };
+                                    }
+                                    <span class="badge @roleBadge">
+                                        <i class="fas @avatarIcon mr-1"></i>@user.Role
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(user.Organization))
+                                    {
+                                        <i class="fas fa-building text-muted mr-1"></i>@user.Organization
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Not specified</span>
+                                    }
+                                </td>
+                                <td>
+                                    <small>@user.CreatedDate.ToString("MMM dd, yyyy")</small><br>
+                                    <small class="text-muted">@user.CreatedDate.ToString("hh:mm tt")</small>
+                                </td>
+                                <td>
+                                    @if (user.IsActive)
+                                    {
+                                        <span class="badge bg-success text-white">
+                                            <i class="fas fa-check"></i> Active
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary text-white">
+                                            <i class="fas fa-ban"></i> Inactive
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        @if (user.IsActive)
+                                        {
+                                            <button class="btn btn-sm btn-outline-info" 
+                                                    onclick="viewUserDetails(@user.Id, '@user.Name', '@user.Email', '@user.Role', '@user.Organization', '@user.PhoneNumber', '@user.Bio', '@user.LinkedInProfile', '@user.GitHubProfile')" 
+                                                    title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            @if (user.Role != "Admin")
+                                            {
+                                                <button class="btn btn-sm btn-outline-danger" 
+                                                        onclick="deleteUser(@user.Id, '@user.Name', '@user.Role')" title="Delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <span class="btn btn-sm btn-outline-secondary disabled" title="Cannot delete admin">
+                                                    <i class="fas fa-shield-alt"></i>
+                                                </span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted"><small>Deleted</small></span>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No users found</h5>
+                <p class="text-muted">Start by adding contributors to help grow your platform.</p>
+                <a href="@Url.Action("AddContributor")" class="btn btn-success">
+                    <i class="fas fa-user-plus"></i> Add New Contributor
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- User Details Modal -->
+<div class="modal fade" id="userDetailsModal" tabindex="-1" role="dialog" aria-labelledby="userDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="userDetailsModalLabel">
+                    <i class="fas fa-user"></i> User Details
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <div id="modal-avatar" class="text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                             style="width: 80px; height: 80px; font-size: 2rem;">
+                            <i id="modal-avatar-icon" class="fas fa-user"></i>
+                        </div>
+                        <h5 id="modal-user-name">User Name</h5>
+                        <span id="modal-user-role" class="badge badge-primary">Role</span>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="row mb-3">
+                            <div class="col-sm-4"><strong>Email:</strong></div>
+                            <div class="col-sm-8" id="modal-user-email">email@example.com</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4"><strong>Organization:</strong></div>
+                            <div class="col-sm-8" id="modal-user-organization">Not specified</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-4"><strong>Phone:</strong></div>
+                            <div class="col-sm-8" id="modal-user-phone">Not specified</div>
+                        </div>
+                        <div class="row mb-3" id="modal-bio-section">
+                            <div class="col-sm-4"><strong>Bio:</strong></div>
+                            <div class="col-sm-8" id="modal-user-bio">Not provided</div>
+                        </div>
+                        <div class="row mb-3" id="modal-social-section">
+                            <div class="col-sm-4"><strong>Social Profiles:</strong></div>
+                            <div class="col-sm-8">
+                                <div id="modal-linkedin-link" style="display: none;">
+                                    <a id="modal-linkedin-url" href="#" target="_blank" class="btn btn-sm btn-primary mr-2">
+                                        <i class="fab fa-linkedin"></i> LinkedIn
+                                    </a>
+                                </div>
+                                <div id="modal-github-link" style="display: none;">
+                                    <a id="modal-github-url" href="#" target="_blank" class="btn btn-sm btn-dark">
+                                        <i class="fab fa-github"></i> GitHub
+                                    </a>
+                                </div>
+                                <div id="modal-no-social" class="text-muted">
+                                    No social profiles provided
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle"></i> Confirm Delete
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong id="deleteUserName"></strong> (<span id="deleteUserRole"></span>)?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Note:</strong> This will mark the user as inactive. All their contributions will be preserved.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" id="confirmDelete" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete User
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .user-avatar {
+        flex-shrink: 0;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .btn-group .btn {
+        margin-right: 2px;
+    }
+    
+    .card {
+        border-radius: 10px;
+    }
+    
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+    
+    .badge {
+        font-size: 0.75em;
+    }
+    
+    .table-secondary {
+        opacity: 0.7;
+    }
+    
+    .disabled {
+        cursor: not-allowed;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        let usersData = [];
+        
+        $(document).ready(function() {
+            // Store original table data for filtering
+            $('#usersTable tbody tr').each(function() {
+                const row = $(this);
+                usersData.push({
+                    element: row,
+                    name: row.find('h6').text().toLowerCase(),
+                    email: row.find('small').first().text().toLowerCase(),
+                    role: row.find('.badge').text().trim().toLowerCase(),
+                    organization: row.find('td:nth-child(3)').text().toLowerCase(),
+                    date: new Date(row.find('td:nth-child(4) small:first').text()),
+                    isActive: row.find('.badge-success').length > 0
+                });
+            });
+            
+            // Search functionality
+            $('#searchInput').on('input', function() {
+                filterAndSort();
+            });
+            
+            // Role filter
+            $('#roleFilter').on('change', function() {
+                filterAndSort();
+            });
+            
+            // Sort functionality
+            $('#sortBy').on('change', function() {
+                filterAndSort();
+            });
+        });
+        
+        function filterAndSort() {
+            const searchTerm = $('#searchInput').val().toLowerCase();
+            const roleFilter = $('#roleFilter').val().toLowerCase();
+            const sortBy = $('#sortBy').val();
+            
+            let filteredData = usersData.filter(function(item) {
+                const matchesSearch = item.name.includes(searchTerm) || 
+                                    item.email.includes(searchTerm) || 
+                                    item.organization.includes(searchTerm);
+                const matchesRole = !roleFilter || item.role.includes(roleFilter);
+                
+                return matchesSearch && matchesRole;
+            });
+            
+            // Sort the filtered data
+            filteredData.sort(function(a, b) {
+                switch(sortBy) {
+                    case 'name':
+                        return a.name.localeCompare(b.name);
+                    case 'name-desc':
+                        return b.name.localeCompare(a.name);
+                    case 'email':
+                        return a.email.localeCompare(b.email);
+                    case 'role':
+                        return a.role.localeCompare(b.role);
+                    case 'date':
+                        return b.date - a.date;
+                    case 'date-desc':
+                        return a.date - b.date;
+                    default:
+                        return 0;
+                }
+            });
+            
+            // Hide all rows first
+            $('#usersTable tbody tr').hide();
+            
+            // Show filtered and sorted rows
+            filteredData.forEach(function(item, index) {
+                item.element.show().css('order', index);
+            });
+            
+            // Show "no results" message if needed
+            if (filteredData.length === 0) {
+                if ($('#noResults').length === 0) {
+                    $('#usersTable tbody').append(
+                        '<tr id="noResults"><td colspan="6" class="text-center py-4">' +
+                        '<i class="fas fa-search fa-2x text-muted mb-2"></i><br>' +
+                        '<span class="text-muted">No users found matching your criteria.</span></td></tr>'
+                    );
+                }
+            } else {
+                $('#noResults').remove();
+            }
+        }
+        
+        function viewUserDetails(id, name, email, role, organization, phone, bio, linkedin, github) {
+            $('#modal-user-name').text(name);
+            $('#modal-user-email').text(email);
+            $('#modal-user-organization').text(organization || 'Not specified');
+            $('#modal-user-phone').text(phone || 'Not specified');
+            
+            // Set avatar and role
+            const avatarConfig = {
+                'Admin': { class: 'bg-warning', icon: 'fa-user-shield', badge: 'badge-warning' },
+                'Contributor': { class: 'bg-success', icon: 'fa-user-edit', badge: 'badge-success' },
+                'Student': { class: 'bg-primary', icon: 'fa-user-graduate', badge: 'badge-primary' }
+            };
+            
+            const config = avatarConfig[role] || { class: 'bg-secondary', icon: 'fa-user', badge: 'badge-secondary' };
+            
+            $('#modal-avatar').attr('class', config.class + ' text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3');
+            $('#modal-avatar-icon').attr('class', 'fas ' + config.icon);
+            $('#modal-user-role').attr('class', 'badge ' + config.badge).text(role);
+            
+            // Handle bio
+            if (bio && bio.trim()) {
+                $('#modal-user-bio').text(bio);
+                $('#modal-bio-section').show();
+            } else {
+                $('#modal-bio-section').hide();
+            }
+            
+            // Handle social profiles
+            let hasSocial = false;
+            
+            if (linkedin && linkedin.trim()) {
+                $('#modal-linkedin-url').attr('href', linkedin);
+                $('#modal-linkedin-link').show();
+                hasSocial = true;
+            } else {
+                $('#modal-linkedin-link').hide();
+            }
+            
+            if (github && github.trim()) {
+                $('#modal-github-url').attr('href', github);
+                $('#modal-github-link').show();
+                hasSocial = true;
+            } else {
+                $('#modal-github-link').hide();
+            }
+            
+            if (hasSocial) {
+                $('#modal-no-social').hide();
+            } else {
+                $('#modal-no-social').show();
+            }
+            
+            $('#userDetailsModal').modal('show');
+        }
+        
+        function deleteUser(userId, userName, userRole) {
+            $('#deleteUserName').text(userName);
+            $('#deleteUserRole').text(userRole);
+            
+            // Set the form action to the delete URL
+            var deleteUrl = '@Url.Action("DeleteUser", "Admin")' + '/' + userId;
+            $('#deleteForm').attr('action', deleteUrl);
+            
+            // Reset button state
+            $('#confirmDelete').removeClass('disabled')
+                              .html('<i class="fas fa-trash"></i> Delete User');
+            
+            $('#deleteModal').modal('show');
+        }
+
+        // Add loading state to delete button
+        $(document).ready(function() {
+            $('#deleteForm').submit(function(e) {
+                var $btn = $('#confirmDelete');
+                
+                // Prevent double clicks
+                if ($btn.hasClass('disabled')) {
+                    e.preventDefault();
+                    return false;
+                }
+                
+                // Show loading state
+                $btn.addClass('disabled')
+                    .html('<i class="fas fa-spinner fa-spin"></i> Deleting...');
+                
+                // Let the form submit normally
+                return true;
+            });
+        });
+        
+        // Auto-hide success message
+        setTimeout(function() {
+            $('.alert-success').fadeOut();
+        }, 5000);
+    </script>
+}

@@ -1,0 +1,429 @@
+@model List<InterviewCracker.Models.College>
+
+@{
+    ViewData["Title"] = "Manage Colleges";
+}
+
+<!-- Success/Error Messages -->
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> @TempData["Message"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="fas fa-university text-warning"></i>
+                Manage Colleges
+            </h2>
+            <a href="@Url.Action("AddCollege")" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add New College
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-university fa-2x mr-3"></i>
+                    <div>
+                        <h3 class="mb-0">@Model.Count()</h3>
+                        <small>Total Colleges</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-check-circle fa-2x mr-3"></i>
+                    <div>
+                        <h3 class="mb-0">@Model.Count(c => c.IsActive)</h3>
+                        <small>Active Colleges</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-map-marker-alt fa-2x mr-3"></i>
+                    <div>
+                        <h3 class="mb-0">@Model.Where(c => c.IsActive).Select(c => c.Location).Distinct().Count()</h3>
+                        <small>Unique Locations</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-calendar fa-2x mr-3"></i>
+                    <div>
+                        <h3 class="mb-0">@Model.Count(c => c.CreatedDate.Date == DateTime.Today)</h3>
+                        <small>Added Today</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filter -->
+<div class="card mb-4 manage-colleges-filters">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="searchInput" class="form-label">
+                        <i class="fas fa-search text-primary" aria-hidden="true"></i>
+                        <span>Search Colleges:</span>
+                    </label>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search by name or location...">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="locationFilter" class="form-label">
+                        <i class="fas fa-map-marker-alt text-info" aria-hidden="true"></i>
+                        <span>Filter by Location:</span>
+                    </label>
+                    <select id="locationFilter" class="form-control">
+                        <option value="">All Locations</option>
+                        @foreach (var location in Model.Where(c => c.IsActive && !string.IsNullOrEmpty(c.Location)).Select(c => c.Location).Distinct().OrderBy(l => l))
+                        {
+                            <option value="@location">@location</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Colleges Table -->
+<div class="card shadow">
+    <div class="card-header bg-warning text-dark">
+        <h5 class="mb-0">
+            <i class="fas fa-list"></i>
+            All Colleges
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-striped mb-0" id="collegesTable">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>College</th>
+                            <th>Location</th>
+                            <th>Description</th>
+                            <th>Date Added</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var college in Model.OrderBy(c => c.Name))
+                        {
+                            <tr data-college-id="@college.Id" class="@(college.IsActive ? "" : "table-secondary")">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="@(!string.IsNullOrEmpty(college.ImageUrl) ? college.ImageUrl : "/images/default-college.jpg")" 
+                                             alt="@college.Name" class="college-logo mr-3" 
+                                             style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                        <div>
+                                            <h6 class="mb-0">@college.Name</h6>
+                                            <small class="text-muted">ID: @college.Id</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(college.Location))
+                                    {
+                                        <i class="fas fa-map-marker-alt text-muted mr-1"></i>@college.Location
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Not specified</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(college.Description))
+                                    {
+                                        <span class="college-description">
+                                            @(college.Description.Length > 80 ? college.Description.Substring(0, 80) + "..." : college.Description)
+                                        </span>
+                                        @if (college.Description.Length > 80)
+                                        {
+                                            <button class="btn btn-sm btn-link p-0 ml-1" onclick="toggleDescription(this, '@college.Description.Replace("\"", "\\\"")')">
+                                                <small>Show More</small>
+                                            </button>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No description</span>
+                                    }
+                                </td>
+                                <td>
+                                    <small>@college.CreatedDate.ToString("MMM dd, yyyy")</small><br>
+                                    <small class="text-muted">@college.CreatedDate.ToString("hh:mm tt")</small>
+                                </td>
+                                <td>
+                                    @if (college.IsActive)
+                                    {
+                                        <span class="badge badge-success">
+                                            <i class="fas fa-check"></i> Active
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">
+                                            <i class="fas fa-ban"></i> Inactive
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        @if (college.IsActive)
+                                        {
+                                            <a href="@Url.Action("EditCollege", new { id = college.Id })" 
+                                               class="btn btn-sm btn-outline-primary" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-danger" 
+                                                    onclick="deleteCollege(@college.Id, '@college.Name')" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted"><small>Deleted</small></span>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-university fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No colleges found</h5>
+                <p class="text-muted">Start by adding your first college.</p>
+                <a href="@Url.Action("AddCollege")" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add New College
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle"></i> Confirm Delete
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the college <strong id="collegeName"></strong>?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Note:</strong> This will mark the college as inactive. All associated data will be preserved.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="deleteCollegeId" name="id" value="" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete College
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .college-logo {
+        border: 1px solid #dee2e6;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .btn-group .btn {
+        margin-right: 2px;
+    }
+    
+    .card {
+        border-radius: 10px;
+    }
+    
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+    
+    .badge {
+        font-size: 0.75em;
+    }
+    
+    .table-secondary {
+        opacity: 0.7;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        let collegesData = [];
+        
+        // Check if Font Awesome is loaded properly
+        $(document).ready(function() {
+            // Font Awesome fallback check
+            setTimeout(function() {
+                $('i.fas').each(function() {
+                    var $icon = $(this);
+                    var computedStyle = window.getComputedStyle($icon[0], ':before');
+                    if (!computedStyle.content || computedStyle.content === 'none' || computedStyle.content === '""') {
+                        // Font Awesome not loaded, add text fallback
+                        if ($icon.hasClass('fa-search')) {
+                            $icon.text('🔍').css('font-family', 'Arial, sans-serif');
+                        } else if ($icon.hasClass('fa-map-marker-alt')) {
+                            $icon.text('📍').css('font-family', 'Arial, sans-serif');
+                        }
+                    }
+                });
+            }, 500);
+            
+            // Store original table data for filtering
+            $('#collegesTable tbody tr').each(function() {
+                const row = $(this);
+                collegesData.push({
+                    element: row,
+                    name: row.find('h6').text().toLowerCase(),
+                    location: row.find('td:nth-child(2)').text().toLowerCase(),
+                    date: new Date(row.find('td:nth-child(4) small:first').text()),
+                    isActive: row.find('.badge-success').length > 0
+                });
+            });
+            
+            // Search functionality
+            $('#searchInput').on('input', function() {
+                filterData();
+            });
+            
+            // Location filter
+            $('#locationFilter').on('change', function() {
+                filterData();
+            });
+        });
+        
+        function filterData() {
+            const searchTerm = $('#searchInput').val().toLowerCase();
+            const locationFilter = $('#locationFilter').val();
+            
+            let filteredData = collegesData.filter(function(item) {
+                const matchesSearch = item.name.includes(searchTerm) || item.location.includes(searchTerm);
+                const matchesLocation = !locationFilter || item.location.includes(locationFilter.toLowerCase());
+                
+                return matchesSearch && matchesLocation;
+            });
+            
+            // Hide all rows first
+            $('#collegesTable tbody tr').hide();
+            
+            // Show filtered rows
+            filteredData.forEach(function(item) {
+                item.element.show();
+            });
+            
+            // Show "no results" message if needed
+            if (filteredData.length === 0) {
+                if ($('#noResults').length === 0) {
+                    $('#collegesTable tbody').append(
+                        '<tr id="noResults"><td colspan="6" class="text-center py-4">' +
+                        '<i class="fas fa-search fa-2x text-muted mb-2"></i><br>' +
+                        '<span class="text-muted">No colleges found matching your criteria.</span></td></tr>'
+                    );
+                }
+            } else {
+                $('#noResults').remove();
+            }
+        }
+        
+        function toggleDescription(button, fullDescription) {
+            const $button = $(button);
+            const $description = $button.siblings('.college-description');
+            
+            if ($button.text().includes('Show More')) {
+                $description.text(fullDescription);
+                $button.html('<small>Show Less</small>');
+            } else {
+                const shortDescription = fullDescription.length > 80 ? fullDescription.substring(0, 80) + '...' : fullDescription;
+                $description.text(shortDescription);
+                $button.html('<small>Show More</small>');
+            }
+        }
+        
+        function deleteCollege(collegeId, collegeName) {
+            $('#collegeName').text(collegeName);
+            $('#deleteCollegeId').val(collegeId);
+            $('#deleteForm').attr('action', '@Url.Action("DeleteCollege", "Admin")');
+            $('#deleteModal').modal('show');
+        }
+        
+        // Handle form submission with loading state
+        $('#deleteForm').on('submit', function() {
+            // Close modal
+            $('#deleteModal').modal('hide');
+            
+            // Show loading overlay
+            $('body').append('<div id="loadingOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;"><div class="spinner-border text-light" role="status"><span class="sr-only">Deleting...</span></div></div>');
+        });
+        
+        // Auto-hide success and error messages
+        setTimeout(function() {
+            $('.alert-success, .alert-danger').fadeOut();
+        }, 5000);
+    </script>
+}

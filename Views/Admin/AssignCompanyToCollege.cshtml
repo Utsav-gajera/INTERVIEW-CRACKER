@@ -1,0 +1,30 @@
+@model InterviewCracker.Models.AssignCompanyToCollegeViewModel
+@{
+    ViewData["Title"] = "Assign Company to College";
+}
+<div class="assign-company-page container">
+    <h2 class="mb-4">Assign Existing Company to College</h2>
+    <form asp-action="AssignCompanyToCollege" method="post">
+        <div class="row g-4 align-items-end">
+            <div class="col-12 col-lg-5">
+                <label for="CollegeId" class="form-label">Select College</label>
+                <select asp-for="CollegeId" asp-items="Model.CollegeList" class="form-select ic-select"></select>
+            </div>
+            <div class="col-12 col-lg-5">
+                <label for="CompanyId" class="form-label">Select Company</label>
+                <select asp-for="CompanyId" asp-items="Model.CompanyList" class="form-select ic-select"></select>
+            </div>
+            <div class="col-12 col-lg-2">
+                <button type="submit" class="btn btn-primary w-100">Assign Company</button>
+            </div>
+        </div>
+    </form>
+</div>
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success mt-3">@TempData["Message"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger mt-3">@TempData["Error"]</div>
+}

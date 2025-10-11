@@ -1,0 +1,332 @@
+@model ProfileViewModel
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Home")">
+                <i class="fas fa-home"></i> Home
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="fas fa-user-circle"></i> Profile
+        </li>
+    </ol>
+</nav>
+
+<!-- Profile Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="questions-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2 class="mb-2">
+                        <i class="fas fa-user-circle"></i> My Profile
+                    </h2>
+                    <p class="mb-2">Manage your account information and preferences</p>
+                    <small>
+                        <i class="fas fa-calendar-alt"></i> Member since: @DateTime.Now.ToString("MMMM yyyy")
+                    </small>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <div class="profile-stats">
+                        <div class="row text-center">
+                            <div class="col-12">
+                                <h4>@Model.Role</h4>
+                                <small>Account Type</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Profile Form -->
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-edit"></i> Edit Profile</h5>
+            </div>
+            <div class="card-body">
+                <!-- Success/Error Messages -->
+                @if (TempData["Message"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle"></i> @TempData["Message"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fas fa-exclamation-triangle"></i> Please correct the errors below and try again.
+                    </div>
+                }
+
+                <form asp-action="Profile" method="post" id="profileForm">
+                    <input type="hidden" asp-for="Id" />
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Name" class="form-label"></label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Organization" class="form-label"></label>
+                            <input asp-for="Organization" class="form-control" />
+                            <span asp-validation-for="Organization" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="PhoneNumber" class="form-label"></label>
+                            <input asp-for="PhoneNumber" class="form-control" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Bio" class="form-label"></label>
+                        <textarea asp-for="Bio" class="form-control" rows="3" placeholder="Tell us about yourself..."></textarea>
+                        <span asp-validation-for="Bio" class="text-danger"></span>
+                        <small class="form-text text-muted">Maximum 500 characters</small>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="LinkedInProfile" class="form-label"></label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">
+                                        <i class="fab fa-linkedin text-primary"></i>
+                                    </span>
+                                </div>
+                                <input asp-for="LinkedInProfile" class="form-control" placeholder="https://www.linkedin.com/in/yourprofile" />
+                            </div>
+                            <span asp-validation-for="LinkedInProfile" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="GitHubProfile" class="form-label"></label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">
+                                        <i class="fab fa-github"></i>
+                                    </span>
+                                </div>
+                                <input asp-for="GitHubProfile" class="form-control" placeholder="https://github.com/yourusername" />
+                            </div>
+                            <span asp-validation-for="GitHubProfile" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Role" class="form-label"></label>
+                        <input asp-for="Role" class="form-control" readonly />
+                        <small class="form-text text-muted">Contact administrator to change your role</small>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary" id="updateProfileBtn">
+                            <i class="fas fa-save"></i> <span id="profileBtnText">Update Profile</span>
+                            <span id="profileBtnSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        </button>
+                        <a href="@Url.Action("ChangePassword")" class="btn btn-outline-warning">
+                            <i class="fas fa-key"></i> Change Password
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Summary Card -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Profile Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="profile-summary">
+                    <div class="text-center mb-3">
+                        <div class="profile-avatar mb-3">
+                            <i class="fas fa-user-circle text-primary" style="font-size: 4rem;"></i>
+                        </div>
+                        <h5 class="text-primary">@Model.Name</h5>
+                        <span class="badge bg-primary text-white">@Model.Role</span>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="profile-info">
+                        <div class="info-item mb-2">
+                            <i class="fas fa-envelope text-muted"></i>
+                            <span class="ms-2">@Model.Email</span>
+                        </div>
+                        
+                        @if (!string.IsNullOrEmpty(Model.Organization))
+                        {
+                            <div class="info-item mb-2">
+                                <i class="fas fa-building text-muted"></i>
+                                <span class="ms-2">@Model.Organization</span>
+                            </div>
+                        }
+                        
+                        @if (!string.IsNullOrEmpty(Model.PhoneNumber))
+                        {
+                            <div class="info-item mb-2">
+                                <i class="fas fa-phone text-muted"></i>
+                                <span class="ms-2">@Model.PhoneNumber</span>
+                            </div>
+                        }
+                    </div>
+                    
+                    @if (!string.IsNullOrEmpty(Model.LinkedInProfile) || !string.IsNullOrEmpty(Model.GitHubProfile))
+                    {
+                        <hr>
+                        <div class="social-links text-center">
+                            @if (!string.IsNullOrEmpty(Model.LinkedInProfile))
+                            {
+                                <a href="@Model.LinkedInProfile" target="_blank" class="btn btn-sm btn-outline-primary me-2">
+                                    <i class="fab fa-linkedin"></i>
+                                </a>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.GitHubProfile))
+                            {
+                                <a href="@Model.GitHubProfile" target="_blank" class="btn btn-sm btn-outline-dark">
+                                    <i class="fab fa-github"></i>
+                                </a>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card mt-3">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-outline-primary">
+                        <i class="fas fa-home"></i> Go to Home
+                    </a>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a href="@Url.Action("Dashboard", "Admin")" class="btn btn-outline-info">
+                            <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+                        </a>
+                    }
+                    @if (User.IsInRole("Contributor"))
+                    {
+                        <a href="@Url.Action("Dashboard", "Contributor")" class="btn btn-outline-success">
+                            <i class="fas fa-edit"></i> Contributor Dashboard
+                        </a>
+                    }
+                    <a href="@Url.Action("Logout")" class="btn btn-outline-danger">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            // Form submission enhancement
+            $('#profileForm').on('submit', function() {
+                var submitBtn = $('#updateProfileBtn');
+                var btnText = $('#profileBtnText');
+                var btnSpinner = $('#profileBtnSpinner');
+                
+                // Show loading state
+                btnText.text('Updating Profile...');
+                btnSpinner.removeClass('d-none');
+                submitBtn.prop('disabled', true);
+                
+                // Reset button state after 5 seconds (in case of error)
+                setTimeout(function() {
+                    btnText.text('Update Profile');
+                    btnSpinner.addClass('d-none');
+                    submitBtn.prop('disabled', false);
+                }, 5000);
+            });
+
+            // Character counter for Bio
+            $('#Bio').on('input', function() {
+                var currentLength = $(this).val().length;
+                var maxLength = 500;
+                var remaining = maxLength - currentLength;
+                
+                var counterElement = $(this).siblings('.char-counter');
+                if (counterElement.length === 0) {
+                    counterElement = $('<small class="form-text text-muted char-counter"></small>');
+                    $(this).after(counterElement);
+                }
+                
+                if (remaining < 0) {
+                    counterElement.html('<span class="text-danger">Character limit exceeded by ' + Math.abs(remaining) + ' characters</span>');
+                } else {
+                    counterElement.html(remaining + ' characters remaining');
+                }
+            });
+
+            // Auto-dismiss alerts after 5 seconds
+            setTimeout(function() {
+                $('.alert').fadeOut();
+            }, 5000);
+        });
+    </script>
+}
+
+<style>
+    .profile-avatar {
+        transition: all 0.3s ease;
+    }
+    
+    .profile-avatar:hover {
+        transform: scale(1.1);
+    }
+    
+    .info-item {
+        display: flex;
+        align-items: center;
+    }
+    
+    .profile-summary .card {
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .social-links a {
+        transition: all 0.3s ease;
+    }
+    
+    .social-links a:hover {
+        transform: translateY(-2px);
+    }
+</style>

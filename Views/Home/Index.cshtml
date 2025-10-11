@@ -1,0 +1,243 @@
+@model CollegeViewModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="jumbotron bg-primary text-white rounded p-4">
+            <h1 class="display-4">
+                <i class="fas fa-graduation-cap"></i> Welcome to Interview Cracker
+            </h1>
+            <p class="lead">Your one-stop platform for placement preparation. Access company-specific and college-specific interview questions to ace your placements!</p>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filter Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="search-form-container">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-search"></i> Search & Filter Colleges</h5>
+            </div>
+            <div class="search-form-body">
+                <form method="get" asp-action="Index">
+                    <div class="row">
+                        <div class="col-lg-6 col-md-12 mb-3">
+                            <label for="searchTerm" class="form-label">Search Colleges:</label>
+                            <input type="text" class="form-control" id="searchTerm" name="searchTerm" 
+                                   value="@Model.SearchTerm" placeholder="Enter college name or description...">
+                        </div>
+                        <div class="col-lg-4 col-md-8 col-sm-12 mb-3">
+                            <label for="filterLocation" class="form-label">Filter by Location:</label>
+                            <select class="form-control" id="filterLocation" name="filterLocation">
+                                <option value="">All Locations</option>
+                                <option value="Pune" selected="@(Model.FilterLocation == "Pune")">Pune</option>
+                                <option value="Mumbai" selected="@(Model.FilterLocation == "Mumbai")">Mumbai</option>
+                                <option value="Vellore" selected="@(Model.FilterLocation == "Vellore")">Vellore</option>
+                                <option value="Trichy" selected="@(Model.FilterLocation == "Trichy")">Trichy</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-2 col-md-4 col-sm-12 mb-3 d-flex align-items-end">
+                            <div class="search-buttons-container w-100">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i>&nbsp;Search
+                                </button>
+                                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times"></i>&nbsp;Clear
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Results Info -->
+@if (!string.IsNullOrEmpty(Model.SearchTerm) || !string.IsNullOrEmpty(Model.FilterLocation))
+{
+    <div class="row">
+        <div class="col-12">
+            <div class="search-results-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>Search Results:</strong> 
+                Showing <span class="badge bg-primary text-white">@Model.Colleges.Count</span> college(s)
+                @if (!string.IsNullOrEmpty(Model.SearchTerm))
+                {
+                    <span>for "<strong>@Model.SearchTerm</strong>"</span>
+                }
+                @if (!string.IsNullOrEmpty(Model.FilterLocation))
+                {
+                    <span>in <strong>@Model.FilterLocation</strong></span>
+                }
+                <a href="@Url.Action("Index")" class="float-end text-primary">
+                    <i class="fas fa-times"></i> Clear all filters
+                </a>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Colleges Grid -->
+<div class="row">
+    <div class="col-12 mb-3">
+        <h3><i class="fas fa-university"></i> Available Colleges (@Model.Colleges.Count)</h3>
+        <hr>
+    </div>
+</div>
+
+@if (Model.Colleges.Any())
+{
+    <div class="row">
+        @foreach (var college in Model.Colleges)
+        {
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                        @if (!string.IsNullOrEmpty(college.ImageUrl))
+                        {
+                            <img src="@college.ImageUrl" alt="@college.Name" class="img-fluid" style="max-height: 180px;">
+                        }
+                        else
+                        {
+                            <i class="fas fa-university text-primary" style="font-size: 4rem;"></i>
+                        }
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title text-primary">@college.Name</h5>
+                        <p class="card-text flex-grow-1">@college.Description</p>
+                        <div class="mt-auto">
+                            <div class="row align-items-center">
+                                <div class="col-sm-6">
+                                    <small class="text-muted">
+                                        <i class="fas fa-map-marker-alt"></i> @college.Location
+                                    </small>
+                                </div>
+                                <div class="col-sm-6 text-sm-end">
+                                    <a href="@Url.Action("Companies", "Home", new { collegeId = college.Id })" 
+                                       class="btn btn-primary btn-sm">
+                                        <i class="fas fa-building"></i> View Companies
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                <i class="fas fa-info-circle fa-2x mb-3"></i>
+                <h5>No colleges found</h5>
+                <p>No colleges match your current search criteria. Try adjusting your search terms or filters.</p>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Quick Stats Section -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h5 class="card-title text-center mb-4">
+                    <i class="fas fa-chart-bar"></i> Platform Statistics
+                </h5>
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3">
+                        <div class="statistic">
+                            <h3 class="text-primary">@Model.Colleges.Count</h3>
+                            <p class="mb-0">Total Colleges</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="statistic">
+                            <h3 class="text-success">50+</h3>
+                            <p class="mb-0">Companies</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="statistic">
+                            <h3 class="text-info">1000+</h3>
+                            <p class="mb-0">Questions</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="statistic">
+                            <h3 class="text-warning">100+</h3>
+                            <p class="mb-0">Contributors</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Card hover effects
+            $('.card').hover(
+                function() {
+                    $(this).addClass('shadow-lg').removeClass('shadow-sm');
+                },
+                function() {
+                    $(this).addClass('shadow-sm').removeClass('shadow-lg');
+                }
+            );
+
+            // Search form enhancements
+            var searchForm = $('form[method="get"]');
+            var searchBtn = searchForm.find('button[type="submit"]');
+            var originalBtnText = searchBtn.html();
+
+            // Form submission with loading state
+            searchForm.on('submit', function() {
+                searchBtn.html('<i class="fas fa-spinner fa-spin"></i> Searching...');
+                searchBtn.prop('disabled', true);
+            });
+
+            // Auto-submit on dropdown change (optional UX improvement)
+            $('#filterLocation').on('change', function() {
+                var searchTerm = $('#searchTerm').val();
+                if (searchTerm.length > 0 || $(this).val().length > 0) {
+                    searchForm.submit();
+                }
+            });
+
+            // Search on Enter key
+            $('#searchTerm').on('keypress', function(e) {
+                if (e.which == 13) {
+                    searchForm.submit();
+                }
+            });
+
+            // Clear button functionality
+            $('.btn-outline-secondary').on('click', function(e) {
+                e.preventDefault();
+                $('#searchTerm').val('');
+                $('#filterLocation').val('');
+                window.location.href = '@Url.Action("Index")';
+            });
+
+            // Highlight search results if there's a search term
+            var searchTerm = '@Html.Raw(Model.SearchTerm ?? "")';
+            if (searchTerm.length > 0) {
+                $('.card-title, .card-text').each(function() {
+                    var text = $(this).text();
+                    var regex = new RegExp('(' + searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+                    $(this).html(text.replace(regex, '<mark>$1</mark>'));
+                });
+            }
+        });
+    </script>
+}

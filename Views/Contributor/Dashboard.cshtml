@@ -1,0 +1,148 @@
+@{
+    ViewData["Title"] = "Contributor Dashboard";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="fas fa-tachometer-alt text-primary"></i>
+                Contributor Dashboard
+            </h2>
+            <div>
+                <a href="@Url.Action("AddMCQ")" class="btn btn-primary mr-2">
+                    <i class="fas fa-plus"></i> Add MCQ
+                </a>
+                <a href="@Url.Action("AddCodingQuestion")" class="btn btn-success">
+                    <i class="fas fa-code"></i> Add Coding Question
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row justify-content-center">
+    <div class="col-xl-4 col-lg-6 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total MCQs
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalMCQs</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-question-circle fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-lg-6 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Total Coding Questions
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TotalCodingQuestions</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-code fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Quick Actions -->
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <a href="@Url.Action("MyQuestions")" class="list-group-item list-group-item-action">
+                        <i class="fas fa-list text-primary mr-2"></i>
+                        View My Questions
+                        <small class="text-muted float-right">Manage your submissions</small>
+                    </a>
+                    <a href="@Url.Action("AddMCQ")" class="list-group-item list-group-item-action">
+                        <i class="fas fa-plus-circle text-success mr-2"></i>
+                        Add New MCQ
+                        <small class="text-muted float-right">Create multiple choice question</small>
+                    </a>
+                    <a href="@Url.Action("AddCodingQuestion")" class="list-group-item list-group-item-action">
+                        <i class="fas fa-code text-info mr-2"></i>
+                        Add Coding Question
+                        <small class="text-muted float-right">Create programming challenge</small>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Guidelines for Contributors</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success mr-2"></i>
+                        <strong>Quality First:</strong> Ensure questions are clear and well-structured
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success mr-2"></i>
+                        <strong>Accuracy:</strong> Verify all answers and explanations are correct
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success mr-2"></i>
+                        <strong>Relevance:</strong> Questions should be interview-appropriate
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success mr-2"></i>
+                        <strong>Approval Process:</strong> All submissions need admin approval
+                    </li>
+                </ul>
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    <strong>Note:</strong> Your submissions will be reviewed by admins before being published.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .border-left-primary {
+        border-left: 0.25rem solid #4e73df !important;
+    }
+    .border-left-success {
+        border-left: 0.25rem solid #1cc88a !important;
+    }
+    .border-left-info {
+        border-left: 0.25rem solid #36b9cc !important;
+    }
+    .border-left-warning {
+        border-left: 0.25rem solid #f6c23e !important;
+    }
+    .text-gray-300 {
+        color: #dddfeb !important;
+    }
+    .text-gray-800 {
+        color: #5a5c69 !important;
+    }
+    .text-xs {
+        font-size: 0.7rem;
+    }
+</style>

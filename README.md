@@ -165,3 +165,10 @@ This frontend is designed to easily integrate with:
 ## Support
 
 For any issues or questions about the frontend implementation, please check the code comments and structure. The application follows standard ASP.NET Core MVC patterns and is well-documented.
+
+## Team members and individual contributions
+
+CE112 - Lakahni Yug Rajeshbhai
+CE026 - Gajera Utsav Vimalbhai
+
+Project is done Via Pair-Programming Concept

@@ -150,17 +150,9 @@ This frontend is designed to easily integrate with:
 
 - Chrome (recommended)
 - Firefox
-- Safari
 - Edge
 - Mobile browsers
 
-## Notes
-
-- This is a **frontend demonstration** with in-memory data
-- Data will reset on application restart
-- Ready for backend integration
-- All forms include proper validation
-- Responsive design works on all screen sizes
 
 ## Support
 
